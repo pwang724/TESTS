@@ -1,3 +1,4 @@
 #TODO: NEW: code up rnn, set varying degrees of backprop unrolling truncation
 #TODO: NEW: DESIGN AR FUNCTIONS. REPEAT THE SAME FOR AR. EXCEPT GUARANTEE FOR STATIONARITY INVOLVES SOLVING ROOTS
 #TODO: https://stats.stackexchange.com/questions/19788/whether-a-arp-process-is-stationary-or-not
+#TODO: UPDATED TODO TEST
