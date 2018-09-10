@@ -1,6 +1,8 @@
 import numpy as np
 import tensorflow as tf
-import Model_CONV_1D as M
+import Model_RNN as Model_RNN
+import Model_MLP as Model_MLP
+import Model_CONV_1D as Model_CONV_1D
 import MA as MA
 import UsefulCommands as UC
 import matplotlib.pyplot as plt
@@ -35,7 +37,10 @@ display_step = 10
 XB, YB = UC.make_batches(data, labels_onehot, batch_size)
 tf.reset_default_graph()
 sess = tf.InteractiveSession(graph=tf.Graph())
-model = M.Model(sess, n_input, n_classes)
+model = Model_RNN.Model(sess, n_input, n_classes, n_hidden = 100, activation_f = 'softmax')
+# model = Model_CONV_1D.Model(sess, n_input, n_classes)
+# model = Model_MLP.Model(sess, n_input, n_classes, [200, 100, 50], 'softmax')
+
 init = tf.global_variables_initializer()
 
 with tf.Session() as sess:
@@ -57,11 +62,7 @@ with tf.Session() as sess:
         if epoch % display_step == 0:
             # r = np.random.randint(0,total_batch-1)
             acc = model.accuracy.eval({model.X: XB[-1], model.Y: YB[-1]})
-            # filter = sess.run(model.filters_0)
-            # filter = np.squeeze(filter)
-            # plt.imshow(filter)
-            # plt.pause(.05)
-            print("Epoch:", '%04d' % (epoch+1),
+            print("Epoch:", '%04d' % (epoch),
                   "cost={:.9f}".format(avg_cost),
                   "Accuracy: %04.4f" % (acc))
 
