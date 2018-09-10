@@ -1,6 +1,7 @@
 import numpy as np
 import random as random
 import matplotlib.pyplot as plt
+
 np.set_printoptions(formatter={'float': lambda x: "{0:0.2f}".format(x)})
 def ma_same_constants(ma, trials = 3, length = 1000):
     coef = 1

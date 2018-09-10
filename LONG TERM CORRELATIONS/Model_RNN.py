@@ -1,7 +1,7 @@
 from __future__ import print_function
 import numpy as np
 import tensorflow as tf
-
+from tensorflow.contrib import rnn
 
 class Model(object):
     learning_rate = 0.001
@@ -16,30 +16,27 @@ class Model(object):
     train_op = []
     accuracy = []
 
-    def __init__(self, sess, n_input, n_classes, hidden_size, activation_f = 'softmax'):
+    def __init__(self, sess, n_time, n_classes, n_hidden, activation_f='softmax'):
         self.sess = sess
-        self.X = tf.placeholder("float", [None, n_input], name='x')
-        self.Y = tf.placeholder("float", [None, n_classes], name = 'y')
+        self.X = tf.placeholder("float", [None, n_time], name='x')
+        self.Y = tf.placeholder("float", [None, n_classes], name='y')
+        X_tensor = tf.expand_dims(self.X, axis=2) #last dimension is input dimension, n_input == 1
+        X_timeslice_of_tensors = tf.unstack(X_tensor, axis=1)
 
-        #weights
-        layer_size = [n_input] + hidden_size + [n_classes]
-        for i in range(len(layer_size)-1):
-            self.weights.append(tf.Variable(tf.random_normal([layer_size[i], layer_size[i+1]])))
-            self.biases.append(tf.Variable(tf.random_normal([layer_size[i+1]])))
+        lstm_cell = rnn.BasicLSTMCell(n_hidden, forget_bias=1.0)
+        outputs, states = rnn.static_rnn(lstm_cell, X_timeslice_of_tensors, dtype=tf.float32)
 
-        #model
-        temp = tf.add(tf.matmul(self.X, self.weights[0]), self.biases[0])
-        for i in range(1, len(layer_size)-2):
-            temp = tf.add(tf.matmul(temp, self.weights[i]), self.biases[i])
-            temp = tf.nn.relu(temp)
-        logits = tf.add(tf.matmul(temp,self.weights[-1]),self.biases[-1])
+        weight_out = tf.Variable(tf.random_normal([n_hidden, n_classes]))
+        bias_out = tf.Variable(tf.random_normal([n_classes]))
+
+        logits = tf.add(tf.matmul(outputs[-1], weight_out), bias_out)
 
         if activation_f == 'softmax':
             self.pred = tf.nn.softmax(logits)
         elif activation_f == 'sigmoid':
             self.pred = tf.nn.sigmoid(logits)
 
-        #accuracy, loss, train
+        # accuracy, loss, train
         correct_prediction = tf.equal(tf.argmax(self.pred, 1), tf.argmax(self.Y, 1))
         self.accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
 
